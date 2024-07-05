@@ -4,14 +4,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const messages_1 = require("../dbal/messages");
-var router = express_1.default.Router();
-/* GET home page. */
-router.get('/', function (req, res, next) {
+const messages_1 = require("../../../dbal/messages");
+const app = (0, express_1.default)();
+/**
+ * API to retrieve all approved messages
+ */
+app.get("/api/get/public-messages", (req, res, next) => {
+    // fetch object of messages
     const messages = (0, messages_1.getMessages)();
-    res.render('index', {
-        title: 'TNText',
-        messages: messages
-    });
+    // Serve it to the caller
+    res.send(messages);
 });
-module.exports = router;
+exports.default = app;
