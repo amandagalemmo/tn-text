@@ -10,9 +10,6 @@ import {normalizePort} from "./util/util";
 
 import indexRouter from "./routes/index";
 
-// Load .env config. This assumes .env is located at top level
-// dotenv.config();
-
 // Instantiate the app
 const app = express();
 // Middleware function that parses incoming requests with JSON payloads
@@ -21,6 +18,10 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 // Middleware function that serves static files
 app.use(express.static(path.join(__dirname, "public")));
+
+// Handle the views
+app.set('views', path.join(__dirname, '../src/views'));
+app.set('view engine', 'pug'); // @TODO This should just be html eventually
 
 // @TODO: Do I need these?
 // app.use(cookieParser());
