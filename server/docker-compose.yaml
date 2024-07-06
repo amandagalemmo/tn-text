@@ -1,0 +1,11 @@
+services:
+  node:
+    image: "node:20.12.2-alpine"
+    user: "node"
+    working_dir: /home/node/app
+    env_file: ".env"
+    volumes:
+      - ./:/home/node/app
+    ports:
+      - "8080:8080"
+    command: npm start
