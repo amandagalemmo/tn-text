@@ -9,3 +9,15 @@ services:
     ports:
       - "8080:8080"
     command: npm start
+  db:
+    image: "postgres:15.7-alpine"
+    environment:
+      POSTGRES_USER: "${PG_USER}"
+      POSTGRES_PASSWORD: "${PG_PASSWORD}"
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
