@@ -3,7 +3,6 @@ import http from "http";
 import path from "path";
 import express from "express";
 import { HttpError } from "http-errors";
-// import dotenv from "dotenv";
 // import logger from "morgan";
 // import cookieParser from "cookie-parser";
 import {normalizePort} from "./util/util";
