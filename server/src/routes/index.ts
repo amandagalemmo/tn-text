@@ -1,16 +1,19 @@
 import express from "express";
-import {getMessages} from "../dbal/messages";
+import {fetchAllMessages} from "../dbal/messages";
 
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  const messages = getMessages();
+router.get('/', async function(req, res, next) {
+  const db = req.app.get("db");
+  const messageRows = await fetchAllMessages(db);
+  console.log("messageRows", messageRows);
+
   res.render(
     'index',
     {
       title: 'TNText',
-      messages: messages
+      messages: []
     }
   );
 });

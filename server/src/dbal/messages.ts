@@ -1,4 +1,21 @@
-export function getMessages(): string[] {
+import pgPromise from "pg-promise";
+import pg from "pg-promise/typescript/pg-subset";
+
+type Message = {
+	id: number;
+	text: string;
+	sentBy: string;
+	approved: boolean | null;
+	createdAt: number;
+	updatedAt: number;
+};
+
+export async function fetchAllMessages(db: pgPromise.IDatabase<{},pg.IClient>) {
+	const rows = await db.any('SELECT * FROM messages');
+	return rows;
+}
+
+export function getHardcodedMessages(): string[] {
 	const messages = [
 		"Hello world!",
 		"What's updog?",

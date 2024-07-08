@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 import http from "http";
 import path from "path";
+import dotenv from "dotenv";
+import dotenvExpand from "dotenv-expand";
 import express from "express";
 import { HttpError } from "http-errors";
+import pgPromise from "pg-promise";
 // import logger from "morgan";
 // import cookieParser from "cookie-parser";
 import {normalizePort} from "./util/util";
-
+// Routes
 import indexRouter from "./routes/index";
+
+const config = dotenv.config();
+dotenvExpand.expand(config);
 
 // Instantiate the app
 const app = express();
@@ -21,6 +27,13 @@ app.use(express.static(path.join(__dirname, "public")));
 // Handle the views
 app.set('views', path.join(__dirname, '../src/views'));
 app.set('view engine', 'pug'); // @TODO This should just be html eventually
+
+// Establish DB connection
+const pgp = pgPromise();
+if (!process.env.DATABASE_URL) {
+  throw new Error("E_NO_DB_STRING");
+}
+app.set("db", pgp(process.env.DATABASE_URL));
 
 // @TODO: Do I need these?
 // app.use(cookieParser());
