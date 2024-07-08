@@ -1,5 +1,5 @@
 import express from "express";
-import { getMessages } from "../../../dbal/messages";
+import { getHardcodedMessages } from "../../../dbal/messages";
 const app = express();
 
 /**
@@ -9,7 +9,7 @@ app.get(
 	"/api/get/public-messages",
 	(req, res, next) => {
 		// fetch object of messages
-		const messages = getMessages();
+		const messages = getHardcodedMessages();
 		// Serve it to the caller
 		res.send(messages);
 	}

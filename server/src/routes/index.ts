@@ -13,7 +13,7 @@ router.get('/', async function(req, res, next) {
     'index',
     {
       title: 'TNText',
-      messages: []
+      messages: messageRows
     }
   );
 });

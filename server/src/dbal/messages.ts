@@ -4,15 +4,29 @@ import pg from "pg-promise/typescript/pg-subset";
 type Message = {
 	id: number;
 	text: string;
-	sentBy: string;
+	sent_by: string;
 	approved: boolean | null;
-	createdAt: number;
-	updatedAt: number;
+	created_at: Date;
+	updated_at: Date;
 };
 
-export async function fetchAllMessages(db: pgPromise.IDatabase<{},pg.IClient>) {
-	const rows = await db.any('SELECT * FROM messages');
-	return rows;
+type MessageInsert = Pick<Message, "text" | "sent_by">
+
+export async function fetchAllMessages(
+	db: pgPromise.IDatabase<{},pg.IClient>
+) {
+	const res: Message[] = await db.any('SELECT * FROM messages');
+	return res;
+}
+
+export async function insertMessage(
+	db: pgPromise.IDatabase<{}, pg.IClient>,
+	msg: MessageInsert
+) {
+	await db.none(
+		"INSERT INTO messages(text, sent_by) VALUES(${text}, ${sent_by})",
+		msg
+	);
 }
 
 export function getHardcodedMessages(): string[] {

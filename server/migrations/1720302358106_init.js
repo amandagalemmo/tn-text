@@ -13,17 +13,17 @@ exports.up = (pgm) => {
 	pgm.createTable("messages", {
 		id: 'id', // Shorthand for incremental ID
 		text: 'text',
-		sentBy: 'text',
+		sent_by: 'text',
 		approved: {
 			type: 'boolean',
 			notNull: false,
 		},
-		createdAt: {
+		created_at: {
 			type: 'timestamp',
 			notNull: true,
 			default: new PgLiteral('current_timestamp'),
 		},
-		updatedAt: {
+		updated_at: {
 			type: 'timestamp',
 			notNull: true,
 			default: new PgLiteral('current_timestamp'),

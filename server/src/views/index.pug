@@ -6,5 +6,8 @@ block content
 	div
 		ul
 			each val in messages
-				li= val
+				li
+					div
+						p from: #{val.sent_by}
+						p=val.text
 	

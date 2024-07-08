@@ -1,17 +1,22 @@
 import express from "express";
-import {twiml} from "twilio";
-const {MessagingResponse} = twiml;
+import { insertMessage } from "../../../dbal/messages";
 
-const app = express();
+const router = express.Router();
 
 /**
  * Receive messages from Twilio webhook
  */
-app.post("/sms", (req, res) => {
-	console.log(req);
-	const reply = new MessagingResponse();
-	reply.message("Thanks for saying hi!");
-	res.type("text/xml").send(twiml.toString());
+router.post("/api/post/sms", async (req, res) => {
+	const db = req.app.get("db");
+	const {body} = req;
+
+	if (!body || !body.from || !body.text) {
+		res.send("E_BAD_PARAMS: Your message was not stored");
+	}
+
+	await insertMessage(db, {sent_by: body.from, text: body.text});
+
+	res.send(200);
 });
 
-export default app;
+export default router;

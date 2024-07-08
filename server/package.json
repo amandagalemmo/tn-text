@@ -8,6 +8,7 @@
     "docker-up": "tsc && docker-compose up -d",
     "docker-down": "docker-compose down",
     "docker-downv": "docker-compose down -v",
+    "docker-res": "npm run docker-down && npm run docker-up",
     "migrate": "node-pg-migrate up",
     "rollback": "node-pg-migrate down",
     "start": "node --env-file=.env ./dist/main.js"

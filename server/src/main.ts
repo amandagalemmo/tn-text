@@ -11,6 +11,7 @@ import pgPromise from "pg-promise";
 import {normalizePort} from "./util/util";
 // Routes
 import indexRouter from "./routes/index";
+import postSmsRouter from "./routes/api/post/sms";
 
 const config = dotenv.config();
 dotenvExpand.expand(config);
@@ -60,6 +61,7 @@ app.set("db", pgp(process.env.DATABASE_URL));
 
 // Establish routes
 app.use("/", indexRouter);
+app.post("/api/post/sms", postSmsRouter);
 
 // Spin up the server
 const port = normalizePort(process.env.PORT || "8080");
