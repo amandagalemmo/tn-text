@@ -2,7 +2,8 @@
 	"version": "1.0",
 	"services": {
 			"node": {
-					"port": 8080
+				"port": 8080,
+				"command": "cd server && docker-compose up"
 			},
 			"db": {
 				"port": 5432
