@@ -6,7 +6,6 @@ FROM node:20.12.2-alpine
 # Set working directory, should docker-compose.yml
 WORKDIR /home/node/app
 # Copy over js code. Assumes tsc has been run locally
-RUN echo ls
 COPY ./server/dist .
 # Copy over .env file
 COPY ./server/.env .
