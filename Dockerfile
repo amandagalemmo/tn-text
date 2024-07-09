@@ -16,6 +16,6 @@ RUN npm i
 # Copy over tsconfig
 COPY ./server/tsconfig.json .
 # Build typescript to js
-RUN tsc
+RUN npm run build
 # All other config handled via docker-compse.yml
 CMD npm start
