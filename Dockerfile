@@ -9,6 +9,8 @@ WORKDIR /home/node/app
 COPY ./server/dist .
 # Copy over .env file
 COPY ./server/.env .
+# Copy over package.json
+COPY ./server/package.json .
 # Install packages
 RUN npm i
 # All other config handled via docker-compse.yml
