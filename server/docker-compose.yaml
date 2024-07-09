@@ -1,14 +1,13 @@
 services:
   node:
-    image: "node:20.12.2-alpine"
+    build: .
     user: "node"
     working_dir: /home/node/app
     env_file: ".env"
     volumes:
-      - ./:/home/node/app
+      - node-server:/home/node/app
     ports:
       - "${NODE_PORT}:8080"
-    command: npm start
     depends_on:
       - db
   db:
@@ -24,3 +23,4 @@ services:
 
 volumes:
   db-data:
+  node-server:
