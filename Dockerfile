@@ -18,4 +18,4 @@ COPY ./server/tsconfig.json .
 # Build typescript to js
 RUN npm run build
 # All other config handled via docker-compse.yml
-CMD npm start
+CMD ["node", "--env-file=.env", "./dist/main.js"]
