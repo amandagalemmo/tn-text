@@ -5,6 +5,7 @@
 FROM node:20.12.2-alpine
 # Set working directory
 WORKDIR /home/node/app
+COPY ./server/docker-compose.yaml .
 
 RUN mkdir src
 COPY ./server/src ./src
