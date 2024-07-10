@@ -10,6 +10,8 @@ router.post("/api/post/sms", async (req, res) => {
 	const db = req.app.get("db");
 	const {body} = req;
 
+	console.log(req.body);
+
 	if (!body || !body.from || !body.text) {
 		res.send("E_BAD_PARAMS: Your message was not stored");
 	}

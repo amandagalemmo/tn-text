@@ -1,0 +1,8 @@
+# flyctl launch added from server/.gitignore
+# .env
+server/**/.env copy
+server/**/node_modules
+
+# tsc output
+# dist/
+fly.toml
