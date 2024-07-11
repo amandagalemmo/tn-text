@@ -10,11 +10,11 @@ router.post("/api/post/sms", async (req, res) => {
 	const db = req.app.get("db");
 	const {body} = req;
 
-	if (!body || !body.From || !body.Body) {
-		res.send("E_BAD_PARAMS: Your message was not stored");
+	if (body && body.From && body.Body) {
+		await insertMessage(db, {sent_by: body.From, text: body.Body});
 	}
 
-	await insertMessage(db, {sent_by: body.From, text: body.Body});
+	res.send(200);
 });
 
 export default router;

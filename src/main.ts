@@ -23,7 +23,7 @@ app.use(express.json());
 // Middleware function that parses incoming requests with urlencoded payloads
 app.use(express.urlencoded({extended: false}));
 // Middleware function that serves static files
-app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Handle the views
 app.set('views', path.join(__dirname, '../src/views'));

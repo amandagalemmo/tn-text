@@ -1,6 +1,6 @@
 services:
   node:
-    build: ..
+    build: .
     user: "node"
     working_dir: /home/node/app
     env_file: ".env"
