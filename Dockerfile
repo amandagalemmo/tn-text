@@ -5,8 +5,10 @@
 FROM node:20.12.2-alpine
 # Set working directory
 WORKDIR /home/node/app
-COPY ./server/docker-compose.yaml .
-
+# Copy over static assets
+RUN mkdir public
+COPY ./server/public ./public
+# Copy over code
 RUN mkdir src
 COPY ./server/src ./src
 # Copy over .env file
