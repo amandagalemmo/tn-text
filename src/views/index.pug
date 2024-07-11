@@ -1,12 +1,7 @@
 extends layout
 
 block content
-	div
-		p Here are messages
-	div
-		ul
-			each val in messages
-				li
-					div
-						p Someone said:
-						p=val.text
+	div(class="messages-container")
+		each val in messages
+			div(class="message")
+				p Someone said: #{val.text}
