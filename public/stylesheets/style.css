@@ -14,7 +14,7 @@ html {
 
 body {
   margin: 0;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
   overflow: auto;
 }
 
@@ -40,4 +40,16 @@ a {
   border-radius: 8px;
   padding: 8px 16px;
   box-shadow: 0px 0px 8px white;
+}
+
+/* Mobile styles */
+@media (max-width: 1250px) {
+  body {
+    font: 32px "Lucida Grande", Helvetica, Arial, sans-serif;
+  }
+
+  .messages-container {
+    padding: 24px 24px;
+    gap: 24px;
+  }
 }
