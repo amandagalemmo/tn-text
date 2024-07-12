@@ -43,7 +43,7 @@ a {
 }
 
 /* Mobile styles */
-@media (max-width: 1250px) {
+@media (max-width: 768px) {
   body {
     font: 32px "Lucida Grande", Helvetica, Arial, sans-serif;
   }
