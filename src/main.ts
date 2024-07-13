@@ -6,8 +6,6 @@ import dotenvExpand from "dotenv-expand";
 import express from "express";
 import { HttpError } from "http-errors";
 import pgPromise from "pg-promise";
-// import logger from "morgan";
-// import cookieParser from "cookie-parser";
 import {normalizePort} from "./util/util";
 // Routes
 import indexRouter from "./routes/index";
@@ -35,29 +33,6 @@ if (!process.env.DATABASE_URL) {
   throw new Error("E_NO_DB_STRING");
 }
 app.set("db", pgp(process.env.DATABASE_URL));
-
-// @TODO: Do I need these?
-// app.use(cookieParser());
-// app.use(logger('dev'));
-
-
-// @TODO: Set up error handling. Here's some sample code:
-// // Catch 404 and forward to error handler
-// app.use((req, res, next) => {
-//   next(createError(404));
-// });
-
-// // Error handler
-// // @TODO handle types
-// app.use((err, req, res, next) => {
-//   // Set locals, only providing error in development
-//   res.locals.message = err.message;
-//   res.locals.error = req.app.get("env") === "development" ? err : {};
-
-//   // Render the error page
-//   res.status(err.status || 500);
-//   res.render("error");
-// });
 
 // Establish routes
 app.use("/", indexRouter);
@@ -116,3 +91,28 @@ export function onListening() {
 
   console.log('Listening on ' + bind);
 }
+
+// @TODO: Do I need these?
+// import logger from "morgan";
+// import cookieParser from "cookie-parser";
+// app.use(cookieParser());
+// app.use(logger('dev'));
+
+
+// @TODO: Set up error handling. Here's some sample code:
+// // Catch 404 and forward to error handler
+// app.use((req, res, next) => {
+//   next(createError(404));
+// });
+
+// // Error handler
+// // @TODO handle types
+// app.use((err, req, res, next) => {
+//   // Set locals, only providing error in development
+//   res.locals.message = err.message;
+//   res.locals.error = req.app.get("env") === "development" ? err : {};
+
+//   // Render the error page
+//   res.status(err.status || 500);
+//   res.render("error");
+// });
