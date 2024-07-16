@@ -12,9 +12,12 @@ router.post("/api/post/sms", async (req, res) => {
 
 	if (body && body.From && body.Body) {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
+	} else {
+		res.sendStatus(400);
+		return;
 	}
 
-	res.send(200);
+	res.sendStatus(200);
 });
 
 export default router;
