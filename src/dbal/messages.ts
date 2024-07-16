@@ -21,10 +21,10 @@ export async function fetchAllMessages(
 
 export async function insertMessage(
 	db: pgPromise.IDatabase<{}, pg.IClient>,
-	msg: MessageInsert
+	msgInsert: MessageInsert
 ) {
 	await db.none(
-		"INSERT INTO messages(text, sent_by) VALUES(${text}, ${sent_by})",
-		msg
+		"INSERT INTO messages(text, sent_by) VALUES($1, $2)",
+		[msgInsert.text, msgInsert.sent_by]
 	);
 }
