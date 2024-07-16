@@ -1,7 +1,12 @@
 extends layout
 
 block content
-	div(class="messages-container")
-		each val in messages
-			div(class="message")
-				p Someone said: #{val.text}
+	- var smsLink = `sms:${phoneNumber}`
+	div(class="content")
+		div(class="header")
+			p Send a message by texting 
+				a(href=smsLink) #{phoneNumber}
+		div(class="messages-container")
+			each val in messages
+				div(class="message")
+					p Someone said: #{val.text}

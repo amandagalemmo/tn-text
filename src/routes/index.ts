@@ -7,12 +7,13 @@ const router = express.Router();
 router.get('/', async function(req, res, next) {
   const db = req.app.get("db");
   const messageRows = await fetchAllMessages(db);
-  console.log("messageRows", messageRows);
+
   res.render(
     'index',
     {
       title: 'TNText',
-      messages: messageRows
+      messages: messageRows,
+      phoneNumber: process.env.TWILIO_PHONE_NUMBER
     }
   );
 });
