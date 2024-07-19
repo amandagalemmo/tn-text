@@ -23,7 +23,8 @@
     "pg-promise": "^11.9.0",
     "pug": "^3.0.3",
     "twilio": "^5.2.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",

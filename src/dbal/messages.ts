@@ -1,7 +1,7 @@
 import pgPromise from "pg-promise";
 import pg from "pg-promise/typescript/pg-subset";
 
-type Message = {
+export type MessageRow = {
 	id: number;
 	text: string;
 	sent_by: string;
@@ -10,12 +10,12 @@ type Message = {
 	updated_at: Date;
 };
 
-type MessageInsert = Pick<Message, "text" | "sent_by">
+type MessageInsert = Pick<MessageRow, "text" | "sent_by">
 
 export async function fetchAllMessages(
 	db: pgPromise.IDatabase<{},pg.IClient>
 ) {
-	const res: Message[] = await db.any('SELECT * FROM messages');
+	const res: MessageRow[] = await db.any('SELECT * FROM messages');
 	return res;
 }
 
