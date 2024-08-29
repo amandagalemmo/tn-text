@@ -30,6 +30,7 @@
     "@types/debug": "^4.1.12",
     "@types/express": "^4.17.21",
     "@types/pg": "^8.11.6",
+    "@types/pug": "^2.0.10",
     "@types/ws": "^8.5.11",
     "node-pg-migrate": "^7.5.2"
   }

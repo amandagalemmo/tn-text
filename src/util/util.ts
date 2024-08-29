@@ -1,3 +1,4 @@
+import pug from "pug";
 import { MessageRow } from "../dbal/messages";
 
 /**
@@ -25,10 +26,10 @@ export function normalizePort(val: string) {
  */
 export function renderMessages(messageRows: MessageRow[]) {
   let html = `<div class="messages-container" id="messages">`;
-  for (let i = 0; i < messageRows.length; i++) {
-    const messageRow = messageRows[i];
-    html += `<div class="message"><p>Someone said: ${messageRow.text}</p></div>`;
-  }
+  messageRows.forEach((messageRow) => {
+    const messageHtml = pug.render("message", {message: messageRow});
+    html += messageHtml;
+  });
   html += "</div>";
   return html;
 }

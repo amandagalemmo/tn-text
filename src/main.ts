@@ -72,8 +72,8 @@ app.post("/api/post/sms", async (req, res) => {
 	if (body && body.From && body.Body) {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
     const messageRows = await fetchAllMessages(db);
-    const messageHtml = renderMessages(messageRows);
-    ws.send(messageHtml);
+    const messagesHtml = renderMessages(messageRows);
+    ws.send(messagesHtml);
 	} else {
 		res.sendStatus(400);
 		return;
