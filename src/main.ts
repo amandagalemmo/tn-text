@@ -7,8 +7,8 @@ import express from "express";
 import { HttpError } from "http-errors";
 import pgPromise from "pg-promise";
 import { WebSocket, WebSocketServer } from "ws";
-import {normalizePort, renderMessages} from "./util/util";
-import { fetchAllMessages, insertMessage } from "./dbal/messages";
+import {normalizePort, renderMessages, renderModTableBody} from "./util/util";
+import { fetchAllMessages, fetchAllApprovedMessages, insertMessage } from "./dbal/messages";
 
 const config = dotenv.config();
 dotenvExpand.expand(config);
@@ -54,7 +54,7 @@ wss.on("connection", (ws) => {
 
 // Establish routes
 app.get("/", async (req, res) => {
-  const messageRows = await fetchAllMessages(db);
+  const messageRows = await fetchAllApprovedMessages(db);
   const messageTexts = messageRows.map((messageRow) => {
     return messageRow.text;
   });
@@ -87,10 +87,11 @@ app.post("/api/post/sms", async (req, res) => {
 	if (body && body.From && body.Body) {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
     const messageRows = await fetchAllMessages(db);
-    const messagesHtml = renderMessages(messageRows);
+    // Update the moderation page
+    const tableBodyHtml = renderModTableBody(messageRows);
 
     if (ws) {
-      ws.send(messagesHtml);
+      ws.send(tableBodyHtml);
     }
 	} else {
 		res.sendStatus(400);

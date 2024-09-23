@@ -35,3 +35,14 @@ export function renderMessages(messageRows: MessageRow[]) {
   html += "</div>";
   return html;
 }
+
+export function renderModTableBody(messageRows: MessageRow[]) {
+  let html = `<tbody id="mod-table-body">`;
+  messageRows.forEach((messageRow) => {
+    const templatePath = path.join(__dirname, "../../src/views/mod-table-row.pug");
+    const rowHtml = pug.renderFile(templatePath, {message: messageRow});
+    html += rowHtml;
+  })
+  html += "</tbody>";
+  return html;
+}

@@ -15,7 +15,14 @@ type MessageInsert = Pick<MessageRow, "text" | "sent_by">
 export async function fetchAllMessages(
 	db: pgPromise.IDatabase<{},pg.IClient>
 ) {
-	const res: MessageRow[] = await db.any('SELECT * FROM messages');
+	const res: MessageRow[] = await db.any('SELECT * FROM messages ORDER BY created_at DESC');
+	return res;
+}
+
+export async function fetchAllApprovedMessages(
+	db: pgPromise.IDatabase<{}, pg.IClient>
+) {
+	const res: MessageRow[] = await db.any('SELECT * FROM messages WHERE approved');
 	return res;
 }
 
