@@ -46,3 +46,9 @@ export function renderModTableBody(messageRows: MessageRow[]) {
   html += "</tbody>";
   return html;
 }
+
+export function renderModTableRow(messageRow: MessageRow) {
+  const templatePath = path.join(__dirname, "../../src/views/mod-table-row.pug");
+  const rowHtml = pug.renderFile(templatePath, {message: messageRow});
+  return rowHtml;
+}

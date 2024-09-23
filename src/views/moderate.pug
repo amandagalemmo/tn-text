@@ -5,16 +5,18 @@ block content
 		div(class="header")
 			h1 Moderation Page 
 		div(class="page-content")
-			div(class="sidebar")
-				div
-					a Messages 
-				div 
-					a Blocked Senders 
-				div
-					a Aliases 
+			//- div(class="sidebar")
+			//- 	div
+			//- 		a Messages 
+			//- 	div 
+			//- 		a Blocked Senders 
+			//- 	div
+			//- 		a Aliases 
 
 			div(class="content")
-				p This table contains every message stored in the database. In order for a message to be displayed on the homepage, it must be approved using the checkmark button ✅. You can always un-approve the message by clicking the disapprove button ❌. You can delete a message by clicking the delete button 🚮.
+				details
+					summary Table instructions
+					p This table contains every message stored in the database. In order for a message to be displayed on the homepage, it must be approved using the checkmark button ✅. You can always un-approve the message by clicking the disapprove button ❌. You can delete a message by clicking the delete button 🚮.
 				div(class="table-container")
 					table 
 						thead 

@@ -7,8 +7,8 @@ import express from "express";
 import { HttpError } from "http-errors";
 import pgPromise from "pg-promise";
 import { WebSocket, WebSocketServer } from "ws";
-import {normalizePort, renderMessages, renderModTableBody} from "./util/util";
-import { fetchAllMessages, fetchAllApprovedMessages, insertMessage } from "./dbal/messages";
+import {normalizePort, renderMessages, renderModTableBody, renderModTableRow} from "./util/util";
+import { fetchAllMessages, fetchAllApprovedMessages, insertMessage, updateMessageApproval, deleteMessage } from "./dbal/messages";
 
 const config = dotenv.config();
 dotenvExpand.expand(config);
@@ -75,6 +75,7 @@ app.get("/moderate", async (req, res) => {
   res.render(
     "moderate",
     {
+      title: 'TNText - Mod Page',
       messages: messageRows
     }
   );
@@ -98,6 +99,62 @@ app.post("/api/post/sms", async (req, res) => {
 		return;
 	}
 	res.sendStatus(200);
+});
+
+app.post("/api/post/approve", async (req, res) => {
+  if (!req.query.id || typeof req.query.id !== "string") {
+    return;
+  }
+
+  const ws = app.get("ws") as WebSocket;
+  const messageId = parseInt(req.query.id);
+  const messageRow = await updateMessageApproval(db, messageId, true);
+
+  if (messageRow) {
+    const tableRowHtml = renderModTableRow(messageRow);
+    ws.send(tableRowHtml);
+
+    const approvedMessageRows = await fetchAllApprovedMessages(db);
+    const approvedMessagesHtml = renderMessages(approvedMessageRows);
+    ws.send(approvedMessagesHtml);
+  }
+});
+
+app.post("/api/post/disapprove", async (req, res) => {
+  if (!req.query.id || typeof req.query.id !== "string") {
+    return;
+  }
+
+  const ws = app.get("ws") as WebSocket;
+  const messageId = parseInt(req.query.id);
+  const messageRow = await updateMessageApproval(db, messageId, false);
+
+  if (messageRow) {
+    const tableRowHtml = renderModTableRow(messageRow);
+    ws.send(tableRowHtml);
+
+    const approvedMessageRows = await fetchAllApprovedMessages(db);
+    const approvedMessagesHtml = renderMessages(approvedMessageRows);
+    ws.send(approvedMessagesHtml);
+  }
+});
+
+app.post("/api/post/delete", async (req, res) => {
+  if (!req.query.id || typeof req.query.id !== "string") {
+    return;
+  }
+
+  const ws = app.get("ws") as WebSocket;
+  const messageId = parseInt(req.query.id);
+  await deleteMessage(db, messageId);
+  const messageRows = await fetchAllMessages(db);
+
+  // Update the moderation page
+  const tableBodyHtml = renderModTableBody(messageRows);
+
+  if (ws) {
+    ws.send(tableBodyHtml);
+  }
 });
 
 server.listen(port);

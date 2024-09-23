@@ -1,8 +1,10 @@
-tr
+tr(id=`message-${message.id}`)
 	td #{message.sent_by}
 	td(class="message-text") #{message.text}
 	td #{message.approved}
 	td(class="actions-container")
-		button(title="Approve") ✅
-		button(title="Disapprove") ❌
-		button(title="Delete") 🚮
+		if message.approved
+			button(title="Disapprove" hx-post=`/api/post/disapprove?id=${message.id}`) ❌
+		else
+			button(title="Approve" hx-post=`/api/post/approve?id=${message.id}`) ✅
+			button(title="Delete" hx-post=`/api/post/delete?id=${message.id}`) 🚮
