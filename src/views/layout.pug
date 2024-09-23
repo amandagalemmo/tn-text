@@ -6,5 +6,5 @@ html
     script(src="https://unpkg.com/htmx.org@2.0.1")
     script(src="https://unpkg.com/htmx-ext-ws@2.0.0/ws.js")
     meta(name="viewport" content="width=device-width, initial-scale=1")
-  body
+  body(hx-ext="ws" ws-connect="/websocket")
     block content

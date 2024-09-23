@@ -2,10 +2,11 @@ extends layout
 
 block content
 	- var smsLink = `sms:${phoneNumber}`
-	div(class="header")
-		p Send a message by texting 
-			a(href=smsLink) #{phoneNumber}
-	div(class="content" hx-ext="ws" ws-connect="/websocket")
-		div(class="messages-container" id="messages")
-			each message in messages
-				include message.pug
+	div(class="index")
+		div(class="header")
+			p Send a message by texting 
+				a(href=smsLink) #{phoneNumber}
+		div(class="content")
+			div(class="messages-container" id="messages")
+				each message in messages
+					include message.pug

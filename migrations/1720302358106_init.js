@@ -16,7 +16,8 @@ exports.up = (pgm) => {
 		sent_by: 'text',
 		approved: {
 			type: 'boolean',
-			notNull: false,
+			notNull: true,
+			default: false
 		},
 		created_at: {
 			type: 'timestamp',

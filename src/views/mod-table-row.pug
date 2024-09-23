@@ -1,0 +1,8 @@
+tr
+	td #{message.sent_by}
+	td(class="message-text") #{message.text}
+	td #{message.approved}
+	td(class="actions-container")
+		button(title="Approve") ✅
+		button(title="Disapprove") ❌
+		button(title="Delete") 🚮

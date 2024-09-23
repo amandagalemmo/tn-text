@@ -44,7 +44,8 @@ server.on("request", app);
 // Create web socket server
 // https://stackoverflow.com/questions/71246576/websocket-endpoints-and-express-router
 const wss = new WebSocketServer({
-  server
+  server,
+  path: "/websocket"
 });
 
 wss.on("connection", (ws) => {
@@ -65,6 +66,17 @@ app.get("/", async (req, res) => {
   );
 });
 
+app.get("/moderate", async (req, res) => {
+  const messageRows = await fetchAllMessages(db);
+
+  res.render(
+    "moderate",
+    {
+      messages: messageRows
+    }
+  );
+});
+
 app.post("/api/post/sms", async (req, res) => {
   const {body} = req;
   const ws = app.get("ws") as WebSocket;
@@ -73,7 +85,9 @@ app.post("/api/post/sms", async (req, res) => {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
     const messageRows = await fetchAllMessages(db);
     const messagesHtml = renderMessages(messageRows);
-    ws.send(messagesHtml);
+    if (ws) {
+      ws.send(messagesHtml);
+    }
 	} else {
 		res.sendStatus(400);
 		return;
