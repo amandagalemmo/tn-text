@@ -1,4 +1,5 @@
 import pug from "pug";
+import path from "path";
 import { MessageRow } from "../dbal/messages";
 
 /**
@@ -27,7 +28,8 @@ export function normalizePort(val: string) {
 export function renderMessages(messageRows: MessageRow[]) {
   let html = `<div class="messages-container" id="messages">`;
   messageRows.forEach((messageRow) => {
-    const messageHtml = pug.render("message", {message: messageRow});
+    const templatePath = path.join(__dirname, "../../src/views/message.pug");
+    const messageHtml = pug.renderFile(templatePath, {message: messageRow.text});
     html += messageHtml;
   });
   html += "</div>";

@@ -55,12 +55,15 @@ wss.on("connection", (ws) => {
 // Establish routes
 app.get("/", async (req, res) => {
   const messageRows = await fetchAllMessages(db);
+  const messageTexts = messageRows.map((messageRow) => {
+    return messageRow.text;
+  });
 
   res.render(
     'index',
     {
       title: 'TNText',
-      messages: messageRows,
+      messages: messageTexts,
       phoneNumber: process.env.TWILIO_PHONE_NUMBER
     }
   );
@@ -85,6 +88,7 @@ app.post("/api/post/sms", async (req, res) => {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
     const messageRows = await fetchAllMessages(db);
     const messagesHtml = renderMessages(messageRows);
+
     if (ws) {
       ws.send(messagesHtml);
     }
