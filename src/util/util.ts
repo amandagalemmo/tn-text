@@ -52,3 +52,4 @@ export function renderModTableRow(messageRow: MessageRow) {
   const rowHtml = pug.renderFile(templatePath, {message: messageRow});
   return rowHtml;
 }
+

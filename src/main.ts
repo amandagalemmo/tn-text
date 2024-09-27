@@ -7,8 +7,19 @@ import express from "express";
 import { HttpError } from "http-errors";
 import pgPromise from "pg-promise";
 import { WebSocket, WebSocketServer } from "ws";
-import {normalizePort, renderMessages, renderModTableBody, renderModTableRow} from "./util/util";
-import { fetchAllMessages, fetchAllApprovedMessages, insertMessage, updateMessageApproval, deleteMessage } from "./dbal/messages";
+import {
+  normalizePort,
+  renderModTableBody,
+  renderModTableRow
+} from "./util/util";
+import {
+  fetchAllMessages,
+  fetchAllApprovedMessages,
+  insertMessage,
+  updateMessageApproval,
+  deleteMessage,
+  MessageRows
+} from "./dbal/messages";
 
 const config = dotenv.config();
 dotenvExpand.expand(config);
@@ -25,7 +36,22 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Handle the views
 app.set('views', path.join(__dirname, '../src/views'));
-app.set('view engine', 'pug'); // @TODO This should just be html eventually
+app.set('view engine', 'pug');
+
+// Initialize state
+type AppState = {
+  messages: MessageRows;
+  approvedMessages: MessageRows;
+  displayQueue: MessageRows;
+  toQueue: MessageRows;
+};
+const initAppState: AppState = {
+  messages: {},
+  approvedMessages: {},
+  displayQueue: {},
+  toQueue: {}
+}
+app.set('state', initAppState);
 
 // Establish DB connection
 const pgp = pgPromise();
@@ -54,8 +80,14 @@ wss.on("connection", (ws) => {
 
 // Establish routes
 app.get("/", async (req, res) => {
-  const messageRows = await fetchAllApprovedMessages(db);
-  const messageTexts = messageRows.map((messageRow) => {
+  const state = app.get('state') as AppState;
+
+  if (!state.approvedMessages.length) {
+    state.approvedMessages = await fetchAllApprovedMessages(db);
+    app.set('state', state);
+  }
+
+  const messageTexts = Object.values(state.approvedMessages).map((messageRow) => {
     return messageRow.text;
   });
 
@@ -70,13 +102,18 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/moderate", async (req, res) => {
-  const messageRows = await fetchAllMessages(db);
+  const state = app.get('state') as AppState;
+
+  if (!state.messages.length) {
+    state.messages = await fetchAllMessages(db);
+    app.set('state', state);
+  }
 
   res.render(
     "moderate",
     {
       title: 'TNText - Mod Page',
-      messages: messageRows
+      messages: Object.values(state.messages)
     }
   );
 });
@@ -84,12 +121,15 @@ app.get("/moderate", async (req, res) => {
 app.post("/api/post/sms", async (req, res) => {
   const {body} = req;
   const ws = app.get("ws") as WebSocket;
+  const state = app.get('state') as AppState;
 
 	if (body && body.From && body.Body) {
 		await insertMessage(db, {sent_by: body.From, text: body.Body});
-    const messageRows = await fetchAllMessages(db);
+    state.messages = await fetchAllMessages(db);
+    app.set('state', state);
+
     // Update the moderation page
-    const tableBodyHtml = renderModTableBody(messageRows);
+    const tableBodyHtml = renderModTableBody(Object.values(state.messages));
 
     if (ws) {
       ws.send(tableBodyHtml);
@@ -107,16 +147,20 @@ app.post("/api/post/approve", async (req, res) => {
   }
 
   const ws = app.get("ws") as WebSocket;
+  const state = app.get('state') as AppState;
+
   const messageId = parseInt(req.query.id);
   const messageRow = await updateMessageApproval(db, messageId, true);
 
   if (messageRow) {
+    state.messages[messageRow.id] = messageRow;
+    state.approvedMessages[messageRow.id] = messageRow;
+    app.set('state', state);
+
     const tableRowHtml = renderModTableRow(messageRow);
     ws.send(tableRowHtml);
 
-    const approvedMessageRows = await fetchAllApprovedMessages(db);
-    const approvedMessagesHtml = renderMessages(approvedMessageRows);
-    ws.send(approvedMessagesHtml);
+    // @TODO handle approved messages
   }
 });
 
@@ -126,16 +170,20 @@ app.post("/api/post/disapprove", async (req, res) => {
   }
 
   const ws = app.get("ws") as WebSocket;
+  const state = app.get('state') as AppState;
+
   const messageId = parseInt(req.query.id);
   const messageRow = await updateMessageApproval(db, messageId, false);
 
   if (messageRow) {
+    state.messages[messageRow.id] = messageRow;
+    delete state.approvedMessages[messageRow.id.toString()];
+    app.set('state', state);
+
     const tableRowHtml = renderModTableRow(messageRow);
     ws.send(tableRowHtml);
 
-    const approvedMessageRows = await fetchAllApprovedMessages(db);
-    const approvedMessagesHtml = renderMessages(approvedMessageRows);
-    ws.send(approvedMessagesHtml);
+    // @TODO handle approved messages
   }
 });
 
@@ -145,12 +193,15 @@ app.post("/api/post/delete", async (req, res) => {
   }
 
   const ws = app.get("ws") as WebSocket;
+  const state = app.get('state') as AppState;
   const messageId = parseInt(req.query.id);
   await deleteMessage(db, messageId);
-  const messageRows = await fetchAllMessages(db);
+  delete state.messages[messageId.toString()];
+  
+  app.set('state', state);
 
   // Update the moderation page
-  const tableBodyHtml = renderModTableBody(messageRows);
+  const tableBodyHtml = renderModTableBody(Object.values(state.messages));
 
   if (ws) {
     ws.send(tableBodyHtml);

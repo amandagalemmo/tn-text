@@ -10,21 +10,33 @@ export type MessageRow = {
 	updated_at: Date;
 };
 
+export type MessageRows = {
+	[id: string]: MessageRow
+};
+
 type pgDb = pgPromise.IDatabase<{}, pg.IClient>;
 type MessageInsert = Pick<MessageRow, "text" | "sent_by">;
 
 export async function fetchAllMessages(
 	db: pgDb
-) {
+): Promise<MessageRows> {
 	const res: MessageRow[] = await db.any('SELECT * FROM messages ORDER BY created_at DESC');
-	return res;
+	let messageRows: MessageRows = {};
+	res.forEach((row) => {
+		messageRows[row.id] = row;
+	});
+	return messageRows;
 }
 
 export async function fetchAllApprovedMessages(
 	db: pgDb
-) {
+): Promise<MessageRows> {
 	const res: MessageRow[] = await db.any('SELECT * FROM messages WHERE approved');
-	return res;
+	let messageRows: MessageRows = {};
+	res.forEach((row) => {
+		messageRows[row.id] = row;
+	});
+	return messageRows;
 }
 
 export async function insertMessage(
