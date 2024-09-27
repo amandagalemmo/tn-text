@@ -4,6 +4,7 @@ import path from "path";
 import dotenv from "dotenv";
 import dotenvExpand from "dotenv-expand";
 import express from "express";
+import favicon from "serve-favicon";
 import { HttpError } from "http-errors";
 import pgPromise from "pg-promise";
 import { WebSocket, WebSocketServer } from "ws";
@@ -33,6 +34,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 // Middleware function that serves static files
 app.use(express.static(path.join(__dirname, "../public")));
+// Middleware function that serves the favicon
+app.use(favicon(path.join(__dirname, '../public', 'favicon.ico')))
 
 // Handle the views
 app.set('views', path.join(__dirname, '../src/views'));
@@ -42,14 +45,14 @@ app.set('view engine', 'pug');
 type AppState = {
   messages: MessageRows;
   approvedMessages: MessageRows;
-  displayQueue: MessageRows;
-  toQueue: MessageRows;
+  displayQueue: string[]; // message row ids
+  toQueue: string[]; // message row ids
 };
 const initAppState: AppState = {
   messages: {},
   approvedMessages: {},
-  displayQueue: {},
-  toQueue: {}
+  displayQueue: [],
+  toQueue: []
 }
 app.set('state', initAppState);
 
@@ -84,6 +87,9 @@ app.get("/", async (req, res) => {
 
   if (!state.approvedMessages.length) {
     state.approvedMessages = await fetchAllApprovedMessages(db);
+    // Originally was making a separate check and setting this, but if there are no 
+    // approved messages should probably just make new displayQueue too.
+    state.displayQueue = [...Object.keys(state.approvedMessages)];
     app.set('state', state);
   }
 
@@ -155,6 +161,7 @@ app.post("/api/post/approve", async (req, res) => {
   if (messageRow) {
     state.messages[messageRow.id] = messageRow;
     state.approvedMessages[messageRow.id] = messageRow;
+    state.toQueue.push(messageRow.id.toString());
     app.set('state', state);
 
     const tableRowHtml = renderModTableRow(messageRow);
@@ -178,6 +185,16 @@ app.post("/api/post/disapprove", async (req, res) => {
   if (messageRow) {
     state.messages[messageRow.id] = messageRow;
     delete state.approvedMessages[messageRow.id.toString()];
+    if (state.displayQueue.includes(messageRow.id.toString())) {
+      state.displayQueue = state.displayQueue.filter((val) => {
+        return val !== messageRow.id.toString();
+      });
+    }
+    if (state.toQueue.includes(messageRow.id.toString())) {
+      state.toQueue = state.toQueue.filter((val) => {
+        return val !== messageRow.id.toString();
+      });
+    }
     app.set('state', state);
 
     const tableRowHtml = renderModTableRow(messageRow);
@@ -187,6 +204,11 @@ app.post("/api/post/disapprove", async (req, res) => {
   }
 });
 
+/**
+ * This endpoint deletes the message in question from the database.
+ * This action can only be taken on not-approved messages,
+ * so no need to clean up approved messages/display queue.
+ */
 app.post("/api/post/delete", async (req, res) => {
   if (!req.query.id || typeof req.query.id !== "string") {
     return;
