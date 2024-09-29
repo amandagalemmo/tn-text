@@ -11,10 +11,6 @@ html, body {
   overflow: hidden;
 }
 
-html {
-  background: linear-gradient(#f69d3c, #3f87a6);
-}
-
 body {
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
@@ -26,42 +22,22 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    align-items: center;
-  }
-  
-  .header {
-    padding: 4px 0px;
-    height: fit-content;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    text-align: center;
-  }
-  
-  .messages-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 16px;
-  
-    height: 90vh;
     width: 80vw;
-    padding-bottom: 24px;
-    overflow-y: auto;
+    margin: auto;
+    /* align-items: center; */
+    justify-content: center;
   }
   
   .message {
-    background: #ffeded;
-    border-radius: 8px;
-    padding: 8px 16px;
-    box-shadow: 0px 0px 8px white;
+    font-size: 24px;
+    padding-top: 8px;
   }
 }
 
 .moderate {
   padding: 16px 32px;
   height: 100vh;
+  background: linear-gradient(#f69d3c, #3f87a6);
 
   .header {
     display: flex;
@@ -94,7 +70,6 @@ body {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      /* overflow-y: auto; */
 
       .table-container {
         height: 100%;

@@ -10,6 +10,7 @@ import pgPromise from "pg-promise";
 import { WebSocket, WebSocketServer } from "ws";
 import {
   normalizePort,
+  renderMessage,
   renderModTableBody,
   renderModTableRow
 } from "./util/util";
@@ -47,12 +48,14 @@ type AppState = {
   approvedMessages: MessageRows;
   displayQueue: string[]; // message row ids
   toQueue: string[]; // message row ids
+  lastDisplayedMessage: string;
 };
 const initAppState: AppState = {
   messages: {},
   approvedMessages: {},
   displayQueue: [],
-  toQueue: []
+  toQueue: [],
+  lastDisplayedMessage: "",
 }
 app.set('state', initAppState);
 
@@ -77,8 +80,15 @@ const wss = new WebSocketServer({
   path: "/websocket"
 });
 
+const wsConnections = new Set<WebSocket>();
+app.set("wsConnections", wsConnections);
+
 wss.on("connection", (ws) => {
-  app.set("ws", ws);
+  // Ideally in the future can separate moderator view/index view websockets,
+  // but for now simply send every event to every connection.
+  // @TODO figure out where close event is sent and remove closed ws from set
+  wsConnections.add(ws);
+  app.set("wsConnections", wsConnections);
 });
 
 // Establish routes
@@ -93,15 +103,20 @@ app.get("/", async (req, res) => {
     app.set('state', state);
   }
 
-  const messageTexts = Object.values(state.approvedMessages).map((messageRow) => {
-    return messageRow.text;
-  });
+  let messageText = "";
+  if (Object.keys(state.approvedMessages).includes(state.lastDisplayedMessage)) {
+    messageText = state.approvedMessages[state.lastDisplayedMessage].text;
+  } else {
+    messageText = state.approvedMessages[state.displayQueue[0]].text;
+    state.lastDisplayedMessage = state.displayQueue[0];
+    app.set('state', state);
+  }
 
   res.render(
     'index',
     {
       title: 'TNText',
-      messages: messageTexts,
+      message: messageText,
       phoneNumber: process.env.TWILIO_PHONE_NUMBER
     }
   );
@@ -126,19 +141,21 @@ app.get("/moderate", async (req, res) => {
 
 app.post("/api/post/sms", async (req, res) => {
   const {body} = req;
-  const ws = app.get("ws") as WebSocket;
+  const wsConnections = app.get("wsConnections") as Set<WebSocket>;
   const state = app.get('state') as AppState;
 
 	if (body && body.From && body.Body) {
-		await insertMessage(db, {sent_by: body.From, text: body.Body});
+		await insertMessage(db, {sent_by: body.From, text: body.Body}); // @TODO maybe return inserted row, averting read here?
     state.messages = await fetchAllMessages(db);
     app.set('state', state);
 
     // Update the moderation page
     const tableBodyHtml = renderModTableBody(Object.values(state.messages));
 
-    if (ws) {
-      ws.send(tableBodyHtml);
+    if (wsConnections.size) {
+      wsConnections.forEach((ws) => {
+        ws.send(tableBodyHtml);
+      });
     }
 	} else {
 		res.sendStatus(400);
@@ -152,7 +169,7 @@ app.post("/api/post/approve", async (req, res) => {
     return;
   }
 
-  const ws = app.get("ws") as WebSocket;
+  const wsConnections = app.get("wsConnections") as Set<WebSocket>;
   const state = app.get('state') as AppState;
 
   const messageId = parseInt(req.query.id);
@@ -165,7 +182,11 @@ app.post("/api/post/approve", async (req, res) => {
     app.set('state', state);
 
     const tableRowHtml = renderModTableRow(messageRow);
-    ws.send(tableRowHtml);
+    if (wsConnections.size) {
+      wsConnections.forEach((ws) => {
+        ws.send(tableRowHtml);
+      });
+    }
 
     // @TODO handle approved messages
   }
@@ -176,7 +197,7 @@ app.post("/api/post/disapprove", async (req, res) => {
     return;
   }
 
-  const ws = app.get("ws") as WebSocket;
+  const wsConnections = app.get("wsConnections") as Set<WebSocket>;
   const state = app.get('state') as AppState;
 
   const messageId = parseInt(req.query.id);
@@ -198,7 +219,11 @@ app.post("/api/post/disapprove", async (req, res) => {
     app.set('state', state);
 
     const tableRowHtml = renderModTableRow(messageRow);
-    ws.send(tableRowHtml);
+    if (wsConnections.size) {
+      wsConnections.forEach((ws) => {
+        ws.send(tableRowHtml);
+      });
+    }
 
     // @TODO handle approved messages
   }
@@ -214,7 +239,7 @@ app.post("/api/post/delete", async (req, res) => {
     return;
   }
 
-  const ws = app.get("ws") as WebSocket;
+  const wsConnections = app.get("wsConnections") as Set<WebSocket>;
   const state = app.get('state') as AppState;
   const messageId = parseInt(req.query.id);
   await deleteMessage(db, messageId);
@@ -225,8 +250,10 @@ app.post("/api/post/delete", async (req, res) => {
   // Update the moderation page
   const tableBodyHtml = renderModTableBody(Object.values(state.messages));
 
-  if (ws) {
-    ws.send(tableBodyHtml);
+  if (wsConnections.size) {
+    wsConnections.forEach((ws) => {
+      ws.send(tableBodyHtml);
+    });
   }
 });
 
@@ -273,4 +300,46 @@ export function onListening() {
     : 'port ' + addr.port;
 
   console.log('Listening on ' + bind);
+  displayLoop();
+}
+
+function displayLoop() {
+  const state = app.get("state") as AppState;
+  const wsConnections = app.get("wsConnections") as Set<WebSocket>;
+  const {approvedMessages, displayQueue, toQueue, lastDisplayedMessage} = state;
+  if (
+    wsConnections.size &&
+    Object.keys(approvedMessages).length &&
+    displayQueue.length
+  ) {
+    let messageToDisplayId = "";
+    const lastDisplayedMessageIndex = displayQueue.indexOf(lastDisplayedMessage);
+    if (toQueue.length) {
+      messageToDisplayId = toQueue[0];
+      if (lastDisplayedMessageIndex === displayQueue.length - 1) {
+        state.lastDisplayedMessage = toQueue[0];
+        state.displayQueue.push(...toQueue);
+        state.toQueue = [];
+      } else {
+        state.displayQueue.push(toQueue.shift()!); // should be safe since we check to make sure toQueue has elements above
+      }
+    } else {
+      if (
+        lastDisplayedMessageIndex === displayQueue.length - 1 ||
+        lastDisplayedMessageIndex === -1
+      ) {
+        messageToDisplayId = displayQueue[0];
+      } else {
+        messageToDisplayId = displayQueue[lastDisplayedMessageIndex + 1];
+      }
+      state.lastDisplayedMessage = messageToDisplayId
+    }
+    app.set("state", state);
+
+    const messageHtml = renderMessage(approvedMessages[messageToDisplayId]);
+    wsConnections.forEach((ws) => {
+      ws.send(messageHtml);
+    });
+  }
+  setTimeout(displayLoop, 10000);
 }

@@ -22,18 +22,10 @@ export function normalizePort(val: string) {
   return false;
 }
 
-/**
- * Given a list of messages from the database, compile them into html.
- */
-export function renderMessages(messageRows: MessageRow[]) {
-  let html = `<div class="messages-container" id="messages">`;
-  messageRows.forEach((messageRow) => {
-    const templatePath = path.join(__dirname, "../../src/views/message.pug");
-    const messageHtml = pug.renderFile(templatePath, {message: messageRow.text});
-    html += messageHtml;
-  });
-  html += "</div>";
-  return html;
+export function renderMessage(messageRow: MessageRow) {
+  const templatePath = path.join(__dirname, "../../src/views/display-message.pug");
+  const messageHtml = pug.renderFile(templatePath, {message: messageRow.text});
+  return messageHtml;
 }
 
 export function renderModTableBody(messageRows: MessageRow[]) {
@@ -52,4 +44,3 @@ export function renderModTableRow(messageRow: MessageRow) {
   const rowHtml = pug.renderFile(templatePath, {message: messageRow});
   return rowHtml;
 }
-
