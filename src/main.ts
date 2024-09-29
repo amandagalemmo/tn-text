@@ -306,8 +306,8 @@ export function onListening() {
 function displayLoop() {
   const state = app.get("state") as AppState;
   const wsConnections = app.get("wsConnections") as Set<WebSocket>;
-  console.log(wsConnections.size);
   const {approvedMessages, displayQueue, toQueue, lastDisplayedMessage} = state;
+
   if (
     wsConnections.size &&
     Object.keys(approvedMessages).length &&
