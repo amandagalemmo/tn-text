@@ -306,6 +306,7 @@ export function onListening() {
 function displayLoop() {
   const state = app.get("state") as AppState;
   const wsConnections = app.get("wsConnections") as Set<WebSocket>;
+  console.log(wsConnections.size);
   const {approvedMessages, displayQueue, toQueue, lastDisplayedMessage} = state;
   if (
     wsConnections.size &&
@@ -338,7 +339,12 @@ function displayLoop() {
 
     const messageHtml = renderMessage(approvedMessages[messageToDisplayId]);
     wsConnections.forEach((ws) => {
-      ws.send(messageHtml);
+      // Check to see which connections are closed and remove them from the list
+      if (ws.readyState == ws.CLOSED) {
+        wsConnections.delete(ws);
+      } else {
+        ws.send(messageHtml);
+      }
     });
   }
   setTimeout(displayLoop, 10000);
