@@ -17,6 +17,7 @@ body {
 
 .index {
   height: 100vh;
+  background-color: #000;
 
   .content {
     display: flex;
@@ -28,9 +29,15 @@ body {
     justify-content: center;
   }
   
+  .phone-number {
+    font-size: 40px;
+    color: #fff;
+  }
+
   .message {
-    font-size: 24px;
-    padding-top: 8px;
+    font-size: 72px;
+    color: #fff;
+    padding-top: 16px;
   }
 }
 
