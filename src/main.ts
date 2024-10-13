@@ -125,7 +125,7 @@ app.get("/", async (req, res) => {
 app.get("/moderate", async (req, res) => {
   const state = app.get('state') as AppState;
 
-  if (!state.messages.length) {
+  if (!Object.keys(state.messages).length) {
     state.messages = await fetchAllMessages(db);
     app.set('state', state);
   }
@@ -134,7 +134,7 @@ app.get("/moderate", async (req, res) => {
     "moderate",
     {
       title: 'TNText - Mod Page',
-      messages: Object.values(state.messages)
+      messages: Object.values(state.messages).reverse()
     }
   );
 });

@@ -41,7 +41,7 @@ body {
   }
 
   .message {
-    animation: fadeIn 0.5s ease-in, fadeOut 1s ease-out 9s;
+    animation: fadeIn 0.5s ease-in, fadeOut 1.5s ease-out 9s;
     font-size: 72px;
     color: #D2A2F9;
     padding-top: 16px;
