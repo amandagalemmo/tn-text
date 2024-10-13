@@ -15,6 +15,12 @@ body {
   font: 16px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.space-mono-regular {
+  font-family: "Space Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .index {
   height: 100vh;
   background-color: #000;
@@ -31,12 +37,13 @@ body {
   
   .phone-number {
     font-size: 40px;
-    color: #fff;
+    color: #D2A2F9;
   }
 
   .message {
+    animation: fadeIn 0.5s ease-in, fadeOut 1s ease-out 9s;
     font-size: 72px;
-    color: #fff;
+    color: #D2A2F9;
     padding-top: 16px;
   }
 }
@@ -142,4 +149,14 @@ body {
       }
     }
   }
+}
+
+@keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+
+@keyframes fadeOut {
+  0% {opacity: 1;}
+  100% {opacity: 0;}
 }
